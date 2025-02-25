@@ -35,9 +35,10 @@ export const parseUrlSearchParams = (
 }
 
 const parse = (k: string, values: string[], schema: ZodTypeAny): unknown => {
-  if (isZodNumber(schema)) return values[0]
-  if (isZodBoolean(schema)) return values[0]
-  if (isZodString(schema)) return values[0]
+  // TODO: Add better errors with coercion. If coercion fails, passthough?
+  if (isZodNumber(schema)) return Number(values[0])
+  if (isZodBoolean(schema)) return values[0] === 'true'
+  if (isZodString(schema)) return String(values[0])
   if (isZodArray(schema)) return values
   throw new UnparseableSearchParamError(k, 'unsupported type')
 }

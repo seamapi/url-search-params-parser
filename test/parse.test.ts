@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { parseUrlSearchParams } from '@seamapi/url-search-params-parser'
 
-test('parses empty string', (t) => {
+test('parses empty params', (t) => {
   const schema = z.object({ foo: z.string() })
   const input = {}
   t.deepEqual(
