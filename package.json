@@ -1,7 +1,7 @@
 {
-  "name": "@seamapi/makenew-tsmodule",
-  "version": "1.5.0",
-  "description": "Package skeleton for a TypeScript module.",
+  "name": "@seamapi/url-search-params-parser",
+  "version": "0.0.0",
+  "description": "Parses URLSearchParams to JavaScript objects according to Zod schemas.",
   "type": "module",
   "main": "index.js",
   "types": "index.d.ts",
@@ -22,9 +22,9 @@
   "keywords": [
     "node"
   ],
-  "homepage": "https://github.com/seamapi/makenew-tsmodule",
-  "bugs": "https://github.com/seamapi/makenew-tsmodule/issues",
-  "repository": "seamapi/makenew-tsmodule",
+  "homepage": "https://github.com/seamapi/url-search-params-parser",
+  "bugs": "https://github.com/seamapi/url-search-params-parser/issues",
+  "repository": "seamapi/url-search-params-parser",
   "license": "MIT",
   "author": {
     "name": "Seam Labs, Inc.",
