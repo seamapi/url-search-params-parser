@@ -1,6 +1,6 @@
 {
   "name": "@seamapi/url-search-params-parser",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Parses URLSearchParams to JavaScript objects according to Zod schemas.",
   "type": "module",
   "main": "index.js",
