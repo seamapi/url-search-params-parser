@@ -22,6 +22,16 @@ export const parseUrlSearchParams = (
     )
   }
 
+  // TODO:
+  // const paramSchema = zodSchemaToParamSchema(schema)
+  // traverse paramSchema, and build a new object
+  // for each node, lookup expected key in searchParams
+  // if match, try to parse and include in object, otherwise, skip node
+
+  // TODO: For array parsing, try to lookup foo=, then foo[]= patterns,
+  // if only one match, try to detect commas, otherwise ignore commas.
+  // if both foo= and foo[]= this is a parse error
+
   const obj: Record<string, unknown> = {}
   for (const [k, v] of Object.entries(
     schema.shape as unknown as Record<string, unknown>,
