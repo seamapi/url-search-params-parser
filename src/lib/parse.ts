@@ -22,7 +22,6 @@ export const parseUrlSearchParams = (
     )
   }
 
-  // TODO:
   // const paramSchema = zodSchemaToParamSchema(schema)
   // traverse paramSchema, and build a new object
   // for each node, lookup expected key in searchParams
