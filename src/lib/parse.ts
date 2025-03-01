@@ -1,13 +1,11 @@
 import type { ZodTypeAny } from 'zod'
 
 import {
-  isZodArray,
-  isZodBoolean,
-  isZodNumber,
-  isZodObject,
-  isZodSchema,
-  isZodString,
-} from './zod.js'
+  type ParamSchema,
+  type ValueType,
+  zodSchemaToParamSchema,
+} from './schema.js'
+import { isZodObject } from './zod.js'
 
 export const parseUrlSearchParams = (
   query: URLSearchParams | string,
@@ -22,33 +20,48 @@ export const parseUrlSearchParams = (
     )
   }
 
-  // const paramSchema = zodSchemaToParamSchema(schema)
-  // traverse paramSchema, and build a new object
-  // for each node, lookup expected key in searchParams
-  // if match, try to parse and include in object, otherwise, skip node
-
-  // TODO: For array parsing, try to lookup foo=, then foo[]= patterns,
-  // if only one match, try to detect commas, otherwise ignore commas.
-  // if both foo= and foo[]= this is a parse error
-
-  const obj: Record<string, unknown> = {}
-  for (const [k, v] of Object.entries(
-    schema.shape as unknown as Record<string, unknown>,
-  )) {
-    if (searchParams.has(k)) {
-      if (isZodSchema(v)) obj[k] = parse(k, searchParams.getAll(k), v)
-    }
-  }
-
-  return obj
+  const paramSchema = zodSchemaToParamSchema(schema)
+  return parseFromParamSchema(searchParams, paramSchema, []) as Record<
+    string,
+    unknown
+  >
 }
 
-const parse = (k: string, values: string[], schema: ZodTypeAny): unknown => {
+const parseFromParamSchema = (
+  searchParams: URLSearchParams,
+  node: ParamSchema | ValueType,
+  path: string[],
+): Record<string, unknown> | unknown => {
+  if (typeof node === 'string') {
+    // TODO: For array parsing, try to lookup foo=, then foo[]= patterns,
+    // if only one match, try to detect commas, otherwise ignore commas.
+    // if both foo= and foo[]= this is a parse error
+    // more generally, try to find a matching key for this node in the searchParams
+    // and throw if conflicting keys are found, e.g, both foo= and foo[]=
+    const key = path.join('.')
+    return parse(key, searchParams.getAll(key), node)
+  }
+
+  const entries = Object.entries(node).reduce<
+    Array<[string, Record<string, unknown> | unknown]>
+  >((acc, entry) => {
+    const [k, v] = entry
+    const currentPath = [...path, k]
+    return [...acc, [k, parseFromParamSchema(searchParams, v, currentPath)]]
+  }, [])
+
+  return Object.fromEntries(entries)
+}
+
+const parse = (k: string, values: string[], type: ValueType): unknown => {
   // TODO: Add better errors with coercion. If coercion fails, passthough?
-  if (isZodNumber(schema)) return Number(values[0])
-  if (isZodBoolean(schema)) return values[0] === 'true'
-  if (isZodString(schema)) return String(values[0])
-  if (isZodArray(schema)) return values
+  // TODO: Is this Number parsing safe?
+  if (values.length === 0) return undefined
+  if (type === 'number') return Number(values[0])
+  if (type === 'boolean') return values[0] === 'true'
+  if (type === 'string') return String(values[0])
+  if (type === 'string_array') return values
+  if (type === 'number_array') return values.map((v) => Number(v))
   throw new UnparseableSearchParamError(k, 'unsupported type')
 }
 

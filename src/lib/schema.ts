@@ -15,7 +15,7 @@ import {
   isZodString,
 } from './zod.js'
 
-type ValueType =
+export type ValueType =
   | 'string'
   | 'number'
   | 'boolean'
@@ -23,7 +23,7 @@ type ValueType =
   | 'string_array'
   | 'number_array'
 
-interface ParamSchema {
+export interface ParamSchema {
   [key: string]: ParamSchema | ValueType
 }
 
@@ -47,6 +47,7 @@ const nestedZodSchemaToParamSchema = (
 ): ParamSchema | ValueType => {
   if (isZodObject(schema)) {
     const shape = schema.shape as unknown as Record<string, unknown>
+
     const entries = Object.entries(shape).reduce<
       Array<[string, ParamSchema | ValueType]>
     >((acc, entry) => {
@@ -57,6 +58,7 @@ const nestedZodSchemaToParamSchema = (
       }
       throw new UnparseableSchemaError(currentPath, 'unexpected non-zod schema')
     }, [])
+
     return Object.fromEntries(entries)
   }
 
