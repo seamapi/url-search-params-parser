@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 import { UnparseableSchemaError, zodSchemaToParamSchema } from './schema.js'
 
-test('parse flat object schemas', (t) => {
+test('zodSchemaToParamSchema: parses flat object schemas', (t) => {
   t.deepEqual(zodSchemaToParamSchema(z.object({ foo: z.string() })), {
     foo: 'string',
   })
@@ -25,7 +25,37 @@ test('parse flat object schemas', (t) => {
   )
 })
 
-test('cannot parse non-object schemas', (t) => {
+test('zodSchemaToParamSchema: parses nested object schemas', (t) => {
+  t.deepEqual(zodSchemaToParamSchema(z.object({ foo: z.string() })), {
+    foo: 'string',
+  })
+  t.deepEqual(
+    zodSchemaToParamSchema(
+      z.object({
+        a: z.string(),
+        b: z.object({
+          c: z.boolean(),
+          d: z.array(z.string()),
+          e: z.object({
+            f: z.boolean(),
+          }),
+        }),
+      }),
+    ),
+    {
+      a: 'string',
+      b: {
+        c: 'boolean',
+        d: 'string_array',
+        e: {
+          f: 'boolean',
+        },
+      },
+    },
+  )
+})
+
+test('zodSchemaToParamSchema: cannot parse non-object schemas', (t) => {
   t.throws(() => zodSchemaToParamSchema(z.number()), {
     instanceOf: UnparseableSchemaError,
   })
