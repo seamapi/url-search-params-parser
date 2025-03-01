@@ -6,6 +6,8 @@
 
 import type { ZodTypeAny } from 'zod'
 
+import { isZodObject } from './zod.js'
+
 type ValueType =
   | 'string'
   | 'number'
@@ -18,6 +20,18 @@ interface ParamSchema {
   [key: string]: ParamSchema | ValueType
 }
 
-export const zodSchemaToParamSchema = (_schema: ZodTypeAny): ParamSchema => {
+export const zodSchemaToParamSchema = (schema: ZodTypeAny): ParamSchema => {
+  if (!isZodObject(schema)) {
+    throw new UnparseableSchemaError(
+      'top level schema must be an object schema',
+    )
+  }
   return {}
+}
+
+export class UnparseableSchemaError extends Error {
+  constructor(message: string) {
+    super(`Could not parse Zod schema: ${message}`)
+    this.name = this.constructor.name
+  }
 }
