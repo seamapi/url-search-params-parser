@@ -7,7 +7,34 @@ Parses URLSearchParams to JavaScript objects according to Zod schemas.
 
 ## Description
 
-TODO
+### Allowed Zod Schemas
+
+- The top-level schema must be an `z.object()` or `z.union()` of `z.object()`.
+- Properties may be a `z.object()` or `z.union()` of objects.
+- All union object types must flatten to a parseable object schema with non-conflicting property types.
+- Primitive properties must be a `z.string()`, `z.number()`, `z.boolean()` or `z.date()`.
+  - Properties must be a single-value type
+  - The primitives `z.bigint()` and `z.symbol()` are not supported.
+  - Strings with zero length are not allowed.
+    If not specified, a `z.string()` is always assumed to be `z.string().min(1)`.
+  - Using `z.enum()` is allowed and equivalent to `z.string()`.
+- Any property may be `z.optional()` or `z.never()`.
+- No property may `z.void()`, `z.undefined()`, `z.any()`, or `z.unknown()`.
+- Any property may be `z.nullable()` except `z.array()`.
+- Properties that are `z.literal()` are allowed and must still obey all of these rules.
+- A `z.array()` must be of a single value-type.
+    - The value-types must obey all the same basic rules
+      for primitive object, union, and property types.
+    - Value-types may not be `z.nullable()` or `z.undefined()`.
+    - The value-type cannot be an `z.array()` or contain a nested `z.array()` at any level.
+- A `z.record()` has less-strict schema constraints but weaker parsing guarantees:
+    - They keys must be `z.string()`.
+    - The value-type may be a single primitive type.
+    - The value-type may be a union of primitives.
+      This union must include `z.string()`
+      and all values will be parsed as `z.string()`.
+    - The value-type may be `z.nullable()`.
+    - The value-type may not be a `z.record()`, `z.array()`, or `z.object()`.
 
 ## Installation
 
