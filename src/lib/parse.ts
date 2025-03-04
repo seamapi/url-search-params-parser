@@ -42,6 +42,10 @@ const parseFromParamSchema = (
     return parse(key, searchParams.getAll(key), node)
   }
 
+  // TODO: Ensure that there are no conflicting object keys, e.g.,
+  // foo.bar= would conflict with foo.bar.a= or foo.bar.b=2
+  // since this would be a null object containing values (null is still a value).
+
   const entries = Object.entries(node).reduce<
     Array<[string, Record<string, unknown> | unknown]>
   >((acc, entry) => {
