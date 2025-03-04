@@ -23,18 +23,18 @@ Parses URLSearchParams to JavaScript objects according to Zod schemas.
 - Any property may be `z.nullable()` except `z.array()`.
 - Properties that are `z.literal()` are allowed and must still obey all of these rules.
 - A `z.array()` must be of a single value-type.
-    - The value-types must obey all the same basic rules
-      for primitive object, union, and property types.
-    - Value-types may not be `z.nullable()` or `z.undefined()`.
-    - The value-type cannot be an `z.array()` or contain a nested `z.array()` at any level.
+  - The value-types must obey all the same basic rules
+    for primitive object, union, and property types.
+  - Value-types may not be `z.nullable()` or `z.undefined()`.
+  - The value-type cannot be an `z.array()` or contain a nested `z.array()` at any level.
 - A `z.record()` has less-strict schema constraints but weaker parsing guarantees:
-    - They keys must be `z.string()`.
-    - The value-type may be a single primitive type.
-    - The value-type may be a union of primitives.
-      This union must include `z.string()`
-      and all values will be parsed as `z.string()`.
-    - The value-type may be `z.nullable()`.
-    - The value-type may not be a `z.record()`, `z.array()`, or `z.object()`.
+  - They keys must be `z.string()`.
+  - The value-type may be a single primitive type.
+  - The value-type may be a union of primitives.
+    This union must include `z.string()`
+    and all values will be parsed as `z.string()`.
+  - The value-type may be `z.nullable()`.
+  - The value-type may not be a `z.record()`, `z.array()`, or `z.object()`.
 
 ## Installation
 
