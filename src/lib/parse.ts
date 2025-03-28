@@ -33,18 +33,9 @@ const parseFromParamSchema = (
   path: string[],
 ): Record<string, unknown> | unknown => {
   if (typeof node === 'string') {
-    // TODO: For array parsing, try to lookup foo=, then foo[]= patterns,
-    // if only one match, try to detect commas, otherwise ignore commas.
-    // if both foo= and foo[]= this is a parse error
-    // more generally, try to find a matching key for this node in the searchParams
-    // and throw if conflicting keys are found, e.g, both foo= and foo[]=
     const key = path.join('.')
     return parse(key, searchParams.getAll(key), node)
   }
-
-  // TODO: Ensure that there are no conflicting object keys, e.g.,
-  // foo.bar= would conflict with foo.bar.a= or foo.bar.b=2
-  // since this would be a null object containing values (null is still a value).
 
   const entries = Object.entries(node).reduce<
     Array<[string, Record<string, unknown> | unknown]>
