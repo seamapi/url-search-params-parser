@@ -22,6 +22,7 @@ export type ValueType =
   | 'date'
   | 'string_array'
   | 'number_array'
+  | 'date_array'
 
 export interface ParamSchema {
   [key: string]: ParamSchema | ValueType
