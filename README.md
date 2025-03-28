@@ -8,7 +8,7 @@ Parses URLSearchParams to JavaScript objects according to Zod schemas.
 ## Description
 
 The set of allowed Zod schemas is restricted to ensure the parsing is unambiguous.
-This parser may be used as a true inverse operation to [@seamapi/url-search-params-serializer].
+This parser may be used as a true inverse operation to [@seamapi/url-search-params-serializer][@url-search-params-serializer].
 
 [@url-search-params-serializer]: https://github.com/seamapi/url-search-params-serializer
 
