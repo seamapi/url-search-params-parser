@@ -23,6 +23,10 @@ export type ValueType =
   | 'string_array'
   | 'number_array'
   | 'date_array'
+  | 'string_record'
+  | 'number_record'
+  | 'boolean_record'
+  | 'date_record'
 
 export interface ParamSchema {
   [key: string]: ParamSchema | ValueType
