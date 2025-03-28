@@ -65,8 +65,10 @@ const parse = (k: string, values: string[], type: ValueType): unknown => {
 
 const parseNumber = (v: string): number | null | string => {
   if (v.length === 0) return null
+  if (v === 'Infinity' || v === '-Infinity') return v
   const n = Number(v)
   if (isNaN(n)) return v
+  if (n === Infinity || n === -Infinity) return v
   return n
 }
 
