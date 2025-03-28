@@ -65,8 +65,8 @@ parseUrlSearchParams(
     name: z.string().min(1),
     age: z.number(),
     isAdmin: z.boolean(),
-    tags: z.array(z.string())
-  })
+    tags: z.array(z.string()),
+  }),
 ) // => { name: 'Dax', age: 27, isAdmin: true, tags: ['cars', 'planes'] }
 ```
 
