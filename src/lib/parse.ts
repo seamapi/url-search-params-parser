@@ -1,4 +1,4 @@
-import type { ZodTypeAny } from 'zod'
+import type { ZodSchema } from 'zod'
 
 import {
   type ParamSchema,
@@ -9,7 +9,7 @@ import { isZodObject } from './zod.js'
 
 export const parseUrlSearchParams = (
   query: URLSearchParams | string,
-  schema: ZodTypeAny,
+  schema: ZodSchema,
 ): Record<string, unknown> => {
   const searchParams =
     typeof query === 'string' ? new URLSearchParams(query) : query
