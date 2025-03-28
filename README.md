@@ -21,10 +21,10 @@ However, some additional input cases are handled:
   whitespace only values are parsed as `null`.
 - For `z.number()`, `z.boolean()`, `z.date()`,
   starting and ending whitespace is trimmed  before parsing.
-- For `z.boolean()`, the following values are parsed as `true`:
-    -
+- For `z.boolean()`, the following strings are parsed as `true`:
+  `true`, `True`, `TRUE`, `yes`, `Yes`, `YES`, and `1`.
 - For `z.boolean()`, the following values are parsed as `false`:
-    -
+  `false`, `False`, `FALSE`, `no`, `No`, `NO`, and '0'.
 - Parses `z.array()` in the following formats.
   In order to support unambiguous parsing, array string values
   containing a `,` are not supported.
