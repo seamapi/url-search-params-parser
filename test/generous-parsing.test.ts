@@ -11,18 +11,27 @@ const parseEmptyOrWhitespace = test.macro({
     const schema = z.object({ foo: type })
     const expected = { foo: null }
     t.deepEqual(parseUrlSearchParams('foo=', schema), expected)
+    t.deepEqual(parseUrlSearchParams('foo= ', schema), expected)
+    t.deepEqual(parseUrlSearchParams('foo=  ', schema), expected)
     t.deepEqual(parseUrlSearchParams('foo=%20', schema), expected)
-    t.deepEqual(parseUrlSearchParams('foo= %20 ++ +  ', schema), expected)
+    t.deepEqual(parseUrlSearchParams('foo=%20%20%20', schema), expected)
     t.deepEqual(parseUrlSearchParams('foo=+', schema), expected)
+    t.deepEqual(parseUrlSearchParams('foo=+++', schema), expected)
+    t.deepEqual(parseUrlSearchParams('foo= %20 ++ +%20 ', schema), expected)
   },
 })
 
 test('number', parseEmptyOrWhitespace, z.number())
+test('boolean', parseEmptyOrWhitespace, z.boolean())
 
 test.todo('parse empty or whitespace boolean params as null')
 test.todo('parse empty or whitespace date params as null')
 test.todo('parse empty or whitespace object params as null')
 test.todo('parse empty or whitespace record params as null')
+
+test.todo('trim whitespace before parsing number params')
+test.todo('trim whitespace before parsing boolean params')
+test.todo('trim whitespace before parsing date params')
 
 test.todo('parse empty or whitespace array params as empty')
 test.todo(

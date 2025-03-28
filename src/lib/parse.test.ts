@@ -24,6 +24,11 @@ test('parseUrlSearchParams: with URLSearchParams input', (t) => {
   )
 })
 
+test.todo('pass though number values that parse as NaN')
+test.todo(
+  'pass though boolean values that do not parse as truthy or falsy values',
+)
+
 // e.g., foo.bar= would conflict with foo.bar.a= or foo.bar.b=2
 // since this would be a null object containing values (null is still a value).
 test.todo('cannot parse conflicting object keys')
