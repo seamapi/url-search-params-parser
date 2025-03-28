@@ -58,8 +58,8 @@ const parse = (k: string, values: string[], type: ValueType): unknown => {
   if (type === 'number') return parseNumber(values[0].trim())
   if (type === 'boolean') return parseBoolean(values[0].trim())
   if (type === 'string') return String(values[0])
-  if (type === 'string_array') return values
-  if (type === 'number_array') return values.map((v) => Number(v))
+  if (type === 'string_array') return values.map((v) => String(v))
+  if (type === 'number_array') return values.map((v) => parseNumber(v))
   throw new UnparseableSearchParamError(k, 'unsupported type')
 }
 

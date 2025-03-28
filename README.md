@@ -53,6 +53,9 @@ However, some additional input cases are handled:
   - Value-types may not be `z.nullable()` or `z.undefined()`.
   - The value-type cannot be a `z.object()`.
   - The value-type cannot be an `z.array()` or contain a nested `z.array()` at any level.
+  - The value-type cannot be a `z.boolean()`.
+    This restriction is not strictly necessary,
+    but a deliberate choice not to support such schemas in this version.
 - A `z.record()` has less-strict schema constraints but weaker parsing guarantees:
   - They keys must be `z.string()`.
   - The value-type may be a single primitive type.
