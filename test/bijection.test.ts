@@ -7,7 +7,7 @@ import { z, type ZodSchema } from 'zod'
 
 import { parseUrlSearchParams } from '@seamapi/url-search-params-parser'
 
-const parses = test.macro({
+const bijection = test.macro({
   title(providedTitle) {
     return `parses ${providedTitle}`
   },
@@ -21,7 +21,7 @@ const parses = test.macro({
 
 test(
   'empty params',
-  parses,
+  bijection,
   {
     foo: undefined,
   },
@@ -30,7 +30,7 @@ test(
 
 test(
   'nested params',
-  parses,
+  bijection,
   {
     foo: 'a',
     bar: { baz: 'b' },
