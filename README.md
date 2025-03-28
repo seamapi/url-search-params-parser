@@ -54,6 +54,22 @@ $ npm install @seamapi/url-search-params-parser
 
 [npm]: https://www.npmjs.com/
 
+## Usage
+
+```ts
+import { parseUrlSearchParams } from '@seamapi/url-search-params-parser'
+
+parseUrlSearchParams(
+  'age=27&isAdmin=true&name=Dax&tags=cars&tags=planes',
+  z.object({
+    name: z.string().min(1),
+    age: z.number(),
+    isAdmin: z.boolean(),
+    tags: z.array(z.string())
+  })
+) // => { name: 'Dax', age: 27, isAdmin: true, tags: ['cars', 'planes'] }
+```
+
 ## Development and Testing
 
 ### Quickstart
