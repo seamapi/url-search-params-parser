@@ -51,12 +51,22 @@ const parseFromParamSchema = (
 const parse = (k: string, values: string[], type: ValueType): unknown => {
   // TODO: Add better errors with coercion. If coercion fails, passthough?
   if (values.length === 0) return undefined
-  if (type === 'number') return Number(values[0])
+
+  if (values[0] == null) {
+    throw new Error(`Unexpected nil value when parsing ${k}`)
+  }
+
+  if (type === 'number') return parseNumber(values[0])
   if (type === 'boolean') return values[0] === 'true'
   if (type === 'string') return String(values[0])
   if (type === 'string_array') return values
   if (type === 'number_array') return values.map((v) => Number(v))
   throw new UnparseableSearchParamError(k, 'unsupported type')
+}
+
+const parseNumber = (v: string): number | null => {
+  if (v.trim().length === 0) return null
+  return Number(v)
 }
 
 export class UnparseableSearchParamError extends Error {
