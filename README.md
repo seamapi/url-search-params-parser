@@ -7,13 +7,18 @@ Parses URLSearchParams to JavaScript objects according to Zod schemas.
 
 ## Description
 
+The set of allowed Zod schemas is restricted to ensure the parsing is unambiguous.
+This parser may be used as a true inverse operation to [@seamapi/url-search-params-serializer].
+
+[@url-search-params-serializer]: https://github.com/seamapi/url-search-params-serializer
+
 ### Allowed Zod Schemas
 
 - The top-level schema must be an `z.object()` or `z.union()` of `z.object()`.
 - Properties may be a `z.object()` or `z.union()` of objects.
 - All union object types must flatten to a parseable object schema with non-conflicting property types.
 - Primitive properties must be a `z.string()`, `z.number()`, `z.boolean()` or `z.date()`.
-  - Properties must be a single-value type
+  - Properties must be a single-value type.
   - The primitives `z.bigint()` and `z.symbol()` are not supported.
   - Strings with zero length are not allowed.
     If not specified, a `z.string()` is always assumed to be `z.string().min(1)`.
@@ -26,15 +31,18 @@ Parses URLSearchParams to JavaScript objects according to Zod schemas.
   - The value-types must obey all the same basic rules
     for primitive object, union, and property types.
   - Value-types may not be `z.nullable()` or `z.undefined()`.
+  - The value-type cannot be a `z.object()`.
   - The value-type cannot be an `z.array()` or contain a nested `z.array()` at any level.
 - A `z.record()` has less-strict schema constraints but weaker parsing guarantees:
   - They keys must be `z.string()`.
   - The value-type may be a single primitive type.
-  - The value-type may be a union of primitives.
-    This union must include `z.string()`
-    and all values will be parsed as `z.string()`.
   - The value-type may be `z.nullable()`.
   - The value-type may not be a `z.record()`, `z.array()`, or `z.object()`.
+    This restriction is not strictly necessary,
+    but a deliberate choice not to support such schemas in this version.
+  - The value-type may be a union of primitive types,
+    but this union must include `z.string()` and all values will be parsed as `z.string()`.
+    For schemas of this type, the parser is no longer a true inverse of the serialization.
 
 ## Installation
 
