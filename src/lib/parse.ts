@@ -50,7 +50,6 @@ const parseFromParamSchema = (
 
 const parse = (k: string, values: string[], type: ValueType): unknown => {
   // TODO: Add better errors with coercion. If coercion fails, passthough?
-  // TODO: Is this Number parsing safe?
   if (values.length === 0) return undefined
   if (type === 'number') return Number(values[0])
   if (type === 'boolean') return values[0] === 'true'

@@ -12,6 +12,23 @@ This parser may be used as a true inverse operation to [@seamapi/url-search-para
 
 [@url-search-params-serializer]: https://github.com/seamapi/url-search-params-serializer
 
+### Generous Parsing
+
+This parser provides strict compatibility with the serialization format of [@url-search-params-serializer].
+However, some additional input cases are handled:
+
+- For `z.number()`, `z.boolean()`, `z.date()`, `z.object()`, and `z.record()`,
+  whitespace only values are parsed as `null`.
+- For `z.boolean()`:
+    - `1`, `True`, and `TRUE` are all parsed as `true`
+    - `0`, `False`, and `FALSE` are all parsed as `true`
+- Parses `z.array()` in the following formats.
+  In order to support unambiguous parsing, array string values
+  containing a `,` are not supported.
+    - `foo=1&bar=2`
+    - `foo[]=1&foo[]=2`
+    - `foo=1,2`
+
 ### Allowed Zod Schemas
 
 - The top-level schema must be an `z.object()` or `z.union()` of `z.object()`.
