@@ -20,7 +20,7 @@ However, some additional input cases are handled:
 - For `z.number()`, `z.boolean()`, `z.date()`, `z.object()`, and `z.record()`,
   whitespace only values are parsed as `null`.
 - For `z.number()`, `z.boolean()`, `z.date()`,
-  starting and ending whitespace is trimmed  before parsing.
+  starting and ending whitespace is trimmed before parsing.
 - For `z.boolean()`, the following strings are parsed as `true`:
   `true`, `True`, `TRUE`, `yes`, `Yes`, `YES`, and `1`.
 - For `z.boolean()`, the following values are parsed as `false`:
@@ -28,9 +28,9 @@ However, some additional input cases are handled:
 - Parses `z.array()` in the following formats.
   In order to support unambiguous parsing, array string values
   containing a `,` are not supported.
-    - `foo=1&bar=2`
-    - `foo[]=1&foo[]=2`
-    - `foo=1,2`
+  - `foo=1&bar=2`
+  - `foo[]=1&foo[]=2`
+  - `foo=1,2`
 
 ### Allowed Zod Schemas
 
