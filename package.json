@@ -3,16 +3,13 @@
   "version": "0.2.0",
   "description": "Parses URLSearchParams to JavaScript objects according to Zod schemas.",
   "type": "module",
+  "main": "index.js",
   "types": "index.d.ts",
   "exports": {
     ".": {
       "import": {
         "types": "./index.d.ts",
         "default": "./index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
       }
     }
   },
@@ -35,7 +32,7 @@
     "index.d.ts",
     "lib",
     "src",
-    "dist",
+    "!test",
     "!**/*.test.ts"
   ],
   "scripts": {
@@ -43,7 +40,6 @@
     "prebuild": "tsx src/index.ts",
     "postbuild": "node ./index.js",
     "build:entrypoints": "npm run build:ts",
-    "postbuild:entrypoints": "tsup",
     "build:ts": "tsc --project tsconfig.build.json",
     "prebuild:ts": "del 'index.*' lib",
     "postbuild:ts": "tsc-alias --project tsconfig.build.json",
@@ -53,40 +49,50 @@
     "test:update": "ava --update-snapshots",
     "test:watch": "ava --watch",
     "test:debug": "ava debug --break",
-    "lint": "eslint --ignore-path .gitignore .",
-    "prelint": "prettier --check --ignore-path .gitignore .",
+    "lint": "eslint .",
+    "postlint": "prettier --check --ignore-path .gitignore .",
     "postversion": "git push --follow-tags",
     "example": "tsx examples",
     "example:inspect": "tsx --inspect examples",
-    "format": "eslint --ignore-path .gitignore --fix .",
-    "preformat": "prettier --write --ignore-path .gitignore .",
+    "format": "prettier --write --ignore-path .gitignore .",
+    "preformat": "eslint --fix .",
     "report": "c8 report"
   },
   "engines": {
-    "node": ">=18.12.0",
-    "npm": ">= 9.0.0"
+    "node": ">=22.11.0",
+    "npm": ">=10.0.0"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^26.0.0 || ^24.11.0 || ^22.11.0"
+    },
+    "packageManager": {
+      "name": "npm",
+      "version": "^12.0.0 || ^11.0.0 || ^10.0.0"
+    }
   },
   "peerDependencies": {
     "zod": "^3.0.0 || ^4.0.0"
   },
   "devDependencies": {
     "@seamapi/url-search-params-serializer": "^3.0.0",
-    "@types/node": "^20.8.10",
-    "ava": "^6.0.1",
-    "c8": "^10.1.2",
-    "del-cli": "^5.0.0",
-    "eslint": "^8.9.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-config-standard-with-typescript": "^43.0.0",
-    "eslint-plugin-simple-import-sort": "^12.0.0",
-    "eslint-plugin-unused-imports": "^3.0.0",
+    "@types/node": "^24.10.9",
+    "ava": "^8.0.1",
+    "c8": "^12.0.0",
+    "del-cli": "^7.0.0",
+    "eslint": "^9.31.0",
+    "eslint-import-resolver-typescript": "^4.4.5",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-simple-import-sort": "^12.1.1",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "jiti": "^2.4.2",
     "landlubber": "^2.0.0",
+    "neostandard": "^0.13.0",
     "prettier": "^3.0.0",
     "tsc-alias": "^1.8.2",
-    "tsup": "^8.0.1",
     "tsx": "^4.6.2",
-    "typescript": "~5.8.3",
+    "typescript": "^6.0.3",
     "zod": "^3.24.2",
     "zod-v4": "npm:zod@^4.0.0"
   }
