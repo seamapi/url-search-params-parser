@@ -24,21 +24,22 @@ export const handler: Handler<Options> = async ({ query, logger }) => {
 
 const schema = z
   .object({
-    a: z.string(),
-    b: z.number(),
-    c: z.boolean(),
-    d: z.null(),
-    e: z.array(z.union([z.string(), z.number()])),
-    f: z.array(z.string()),
-    g: z.date(),
-    h: z.date(),
-    i: z
+    a: z.string().optional(),
+    b: z.number().optional(),
+    c: z.boolean().optional(),
+    d: z.string().nullable().optional(),
+    e: z.enum(['x', 'y']).optional(),
+    f: z.array(z.string()).optional(),
+    g: z.array(z.number()).optional(),
+    h: z.date().optional(),
+    i: z.record(z.string(), z.number()).optional(),
+    j: z
       .object({
-        foo: z.number(),
+        foo: z.number().optional(),
         bar: z
           .object({
-            baz: z.number(),
-            fizz: z.array(z.union([z.string(), z.number()])),
+            baz: z.number().optional(),
+            fizz: z.array(z.string()).optional(),
           })
           .optional(),
       })
