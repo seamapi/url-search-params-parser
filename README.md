@@ -7,7 +7,104 @@ Parses URLSearchParams to JavaScript objects according to Zod schemas.
 
 ## Description
 
-TODO
+The set of allowed Zod schemas is restricted to ensure the parsing is unambiguous.
+This parser may be used as a true inverse operation to [@seamapi/url-search-params-serializer][@url-search-params-serializer].
+
+[@url-search-params-serializer]: https://github.com/seamapi/url-search-params-serializer
+
+### Generous Parsing
+
+This parser provides strict compatibility with the serialization format of [@url-search-params-serializer].
+However, some additional input cases are handled:
+
+- For `z.number()`, `z.boolean()`, `z.date()`, `z.object()`, and `z.record()`,
+  whitespace only values are parsed as `null`.
+- For `z.number()`, `z.boolean()`, `z.date()`,
+  starting and ending whitespace is trimmed before parsing.
+- For `z.boolean()`, the following strings are parsed as `true`:
+  `true`, `True`, `TRUE`, `yes`, `Yes`, `YES`, and `1`.
+- For `z.boolean()`, the following values are parsed as `false`:
+  `false`, `False`, `FALSE`, `no`, `No`, `NO`, and `0`.
+- For `z.number()`, `z.boolean()`, and `z.date()`,
+  values that cannot be parsed as the expected type are passed through
+  unchanged as strings, e.g., `foo=a` is parsed as `'a'` for `z.number()`.
+  Validating the parsed output is left to the schema.
+- For `z.string()`, an empty value is parsed as `null`,
+  since the serializer treats the empty string as `undefined`.
+  Whitespace is significant and is never trimmed for `z.string()`.
+- For `z.object()` and `z.record()`, a non-empty value is passed through
+  unchanged as a string, e.g., `foo=a` is parsed as `'a'`.
+- Parses `z.array()` in the following formats.
+  In order to support unambiguous parsing, array string values
+  containing a `,` are not supported.
+  - `foo=1&foo=2`
+  - `foo[]=1&foo[]=2`
+  - `foo=1,2`
+- Search params not present in the schema are ignored.
+
+### Unparseable Search Params
+
+Some inputs are ambiguous and cannot be parsed unambiguously.
+These throw an `UnparseableSearchParamError`:
+
+- A non-array param with repeated values, e.g., `foo=1&foo=2` for `z.number()`.
+- An array param that mixes array formats,
+  e.g., `foo=1&foo[]=2` or `foo=1,2&foo=3`.
+- An array param that repeats a value containing a `,`,
+  e.g., `foo=a,b&foo=c,d`.
+- An array param using the bracket format with a value containing a `,`,
+  e.g., `foo[]=a,b`.
+- An array param that mixes empty values with other values,
+  e.g., `foo=&foo=1`, `foo=&foo=`, or `foo=a,,b`.
+- An object or record param that conflicts with its own nested params,
+  e.g., `foo.bar=&foo.bar.a=1`,
+  since this would be a null object containing a value.
+- A param nested inside a record param,
+  e.g., `foo.a.b=1` for `z.record(z.string(), z.number())`.
+
+Schemas that do not obey these rules throw an `UnparseableSchemaError`.
+
+- The top-level schema must be an `z.object()` or `z.union()` of `z.object()`.
+- Properties may be a `z.object()` or `z.union()` of objects.
+- All union object types must flatten to a parseable object schema with non-conflicting property types.
+  - Properties present in only some union options are parsed as optional.
+  - Using `z.discriminatedUnion()` is allowed and equivalent to `z.union()`.
+- Primitive properties must be a `z.string()`, `z.number()`, `z.boolean()` or `z.date()`.
+  - Properties must be a single-value type.
+  - The primitives `z.bigint()` and `z.symbol()` are not supported.
+  - Strings with zero length are not allowed.
+    If not specified, a `z.string()` is always assumed to be `z.string().min(1)`.
+  - Using `z.enum()` is allowed and equivalent to `z.string()`.
+  - Using `z.nativeEnum()` is allowed when all its values are strings
+    or all its values are numbers.
+- Any property may be `z.optional()` or `z.never()`.
+- Any property may be `z.null()`, which is always parsed as `null`.
+- No property may `z.void()`, `z.undefined()`, `z.any()`, or `z.unknown()`.
+- Any property may be `z.nullable()` except `z.array()`.
+- Properties that are `z.literal()` are allowed and must still obey all of these rules.
+- The `z.default()` and `z.readonly()` wrappers are allowed and ignored.
+  Defaults are not applied by this parser: applying them is left to the schema.
+- A `z.array()` must be of a single value-type.
+  - The value-types must obey all the same basic rules
+    for primitive object, union, and property types.
+  - A union value-type must resolve to a single value-type,
+    e.g., a `z.union()` of `z.literal()` strings.
+  - Value-types may not be `z.nullable()` or `z.undefined()`.
+  - The value-type cannot be a `z.object()`.
+  - The value-type cannot be an `z.array()` or contain a nested `z.array()` at any level.
+  - The value-type cannot be a `z.boolean()`.
+    This restriction is not strictly necessary,
+    but a deliberate choice not to support such schemas in this version.
+- A `z.record()` has less-strict schema constraints but weaker parsing guarantees:
+  - They keys must be `z.string()` or a `z.enum()`.
+  - The value-type may be a single primitive type.
+  - The value-type may be `z.nullable()`.
+  - The value-type may not be a `z.record()`, `z.array()`, or `z.object()`.
+    This restriction is not strictly necessary,
+    but a deliberate choice not to support such schemas in this version.
+  - The value-type may be a union of primitive types,
+    but this union must include `z.string()` and all values will be parsed as `z.string()`.
+    For schemas of this type, the parser is no longer a true inverse of the serialization.
 
 ## Installation
 
@@ -18,6 +115,42 @@ $ npm install @seamapi/url-search-params-parser
 ```
 
 [npm]: https://www.npmjs.com/
+
+## Usage
+
+```ts
+import { parseUrlSearchParams } from '@seamapi/url-search-params-parser'
+
+parseUrlSearchParams(
+  'age=27&isAdmin=true&name=Dax&tags=cars&tags=planes',
+  z.object({
+    name: z.string().min(1),
+    age: z.number(),
+    isAdmin: z.boolean(),
+    tags: z.array(z.string()),
+  }),
+) // => { name: 'Dax', age: 27, isAdmin: true, tags: ['cars', 'planes'] }
+```
+
+This parser does not validate its output:
+pass the parsed params to the schema to both validate and type them.
+
+```ts
+const schema = z.object({ name: z.string().min(1), age: z.number() })
+
+schema.parse(parseUrlSearchParams('age=27&name=Dax', schema))
+```
+
+Parsing throws an `UnparseableSchemaError` when the schema is not supported,
+and an `UnparseableSearchParamError` when the query string is ambiguous.
+
+```ts
+import {
+  parseUrlSearchParams,
+  UnparseableSchemaError,
+  UnparseableSearchParamError,
+} from '@seamapi/url-search-params-parser'
+```
 
 ## Development and Testing
 
