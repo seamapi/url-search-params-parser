@@ -10,6 +10,10 @@
       "import": {
         "types": "./index.d.ts",
         "default": "./index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
       }
     }
   },
@@ -32,6 +36,7 @@
     "index.d.ts",
     "lib",
     "src",
+    "dist",
     "!test",
     "!**/*.test.ts"
   ],
@@ -40,6 +45,7 @@
     "prebuild": "tsx src/index.ts",
     "postbuild": "node ./index.js",
     "build:entrypoints": "npm run build:ts",
+    "postbuild:entrypoints": "tsup",
     "build:ts": "tsc --project tsconfig.build.json",
     "prebuild:ts": "del 'index.*' lib",
     "postbuild:ts": "tsc-alias --project tsconfig.build.json",
@@ -91,6 +97,7 @@
     "neostandard": "^0.13.0",
     "prettier": "^3.0.0",
     "tsc-alias": "^1.8.2",
+    "tsup": "^8.5.1",
     "tsx": "^4.6.2",
     "typescript": "^6.0.3",
     "zod": "^3.24.2",
