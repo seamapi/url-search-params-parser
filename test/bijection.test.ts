@@ -316,11 +316,24 @@ test(
 
 test(
   'array values containing a comma',
-  notInvertible,
-  { foo: ['a,b'] },
+  bijection,
+  {
+    foo: ['a,b', 'c,d'],
+  },
   z.object({ foo: z.array(z.string()) }),
-  { foo: ['a', 'b'] },
 )
+
+// When parsing generously, a single array value containing a comma
+// is parsed using the comma array format.
+test('does not invert array values containing a comma when strict is false', (t) => {
+  const schema = z.object({ foo: z.array(z.string()) })
+  t.deepEqual(
+    parseUrlSearchParams(serializeUrlSearchParams({ foo: ['a,b'] }), schema, {
+      strict: false,
+    }),
+    { foo: ['a', 'b'] },
+  )
+})
 
 test(
   'the empty object, which is serialized as undefined',
