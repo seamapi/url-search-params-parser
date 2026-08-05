@@ -12,10 +12,29 @@ This parser may be used as a true inverse operation to [@seamapi/url-search-para
 
 [@url-search-params-serializer]: https://github.com/seamapi/url-search-params-serializer
 
+### Strict Parsing
+
+By default, or when passing `strict: true`,
+the parser only parses the expected output of [@url-search-params-serializer],
+making the parser a true inverse of the serializer:
+
+- Parses `z.array()` only in the repeated format `foo=1&foo=2`.
+  - Array values may contain a `,` and are never split,
+    e.g., `foo=a,b&foo=c` is parsed as `['a,b', 'c']`.
+  - There is no bracket array format:
+    since the serializer never outputs it,
+    a param named `foo[]` is unrelated to the param `foo`
+    and is parsed as a param literally named `foo[]`.
+- For `z.boolean()`, only the strings `true` and `false` are parsed.
+- Whitespace is significant and is never trimmed:
+  only a completely empty value is parsed as `null`
+  (or as the empty array for `z.array()`).
+
 ### Generous Parsing
 
-This parser provides strict compatibility with the serialization format of [@url-search-params-serializer].
-However, some additional input cases are handled:
+When passing `strict: false`, additional input cases are handled
+at the cost of some limitations, e.g.,
+array string values containing a `,` are not supported:
 
 - For `z.number()`, `z.boolean()`, `z.date()`, `z.object()`, and `z.record()`,
   whitespace only values are parsed as `null`.
@@ -25,6 +44,17 @@ However, some additional input cases are handled:
   `true`, `True`, `TRUE`, `yes`, `Yes`, `YES`, and `1`.
 - For `z.boolean()`, the following values are parsed as `false`:
   `false`, `False`, `FALSE`, `no`, `No`, `NO`, and `0`.
+- Parses `z.array()` in the following formats.
+  In order to support unambiguous parsing, array string values
+  containing a `,` are not supported.
+  - `foo=1&foo=2`
+  - `foo[]=1&foo[]=2`
+  - `foo=1,2`
+
+### Parsing in Both Modes
+
+These rules apply in strict and generous mode alike:
+
 - For `z.number()`, `z.boolean()`, and `z.date()`,
   values that cannot be parsed as the expected type are passed through
   unchanged as strings, e.g., `foo=a` is parsed as `'a'` for `z.number()`.
@@ -34,12 +64,6 @@ However, some additional input cases are handled:
   Whitespace is significant and is never trimmed for `z.string()`.
 - For `z.object()` and `z.record()`, a non-empty value is passed through
   unchanged as a string, e.g., `foo=a` is parsed as `'a'`.
-- Parses `z.array()` in the following formats.
-  In order to support unambiguous parsing, array string values
-  containing a `,` are not supported.
-  - `foo=1&foo=2`
-  - `foo[]=1&foo[]=2`
-  - `foo=1,2`
 - Search params not present in the schema are ignored.
 
 ### Unparseable Search Params
@@ -48,19 +72,22 @@ Some inputs are ambiguous and cannot be parsed unambiguously.
 These throw an `UnparseableSearchParamError`:
 
 - A non-array param with repeated values, e.g., `foo=1&foo=2` for `z.number()`.
-- An array param that mixes array formats,
-  e.g., `foo=1&foo[]=2` or `foo=1,2&foo=3`.
-- An array param that repeats a value containing a `,`,
-  e.g., `foo=a,b&foo=c,d`.
-- An array param using the bracket format with a value containing a `,`,
-  e.g., `foo[]=a,b`.
 - An array param that mixes empty values with other values,
-  e.g., `foo=&foo=1`, `foo=&foo=`, or `foo=a,,b`.
+  e.g., `foo=&foo=1` or `foo=&foo=`.
 - An object or record param that conflicts with its own nested params,
   e.g., `foo.bar=&foo.bar.a=1`,
   since this would be a null object containing a value.
 - A param nested inside a record param,
   e.g., `foo.a.b=1` for `z.record(z.string(), z.number())`.
+- In generous mode (`strict: false`):
+  - An array param that mixes array formats,
+    e.g., `foo=1&foo[]=2` or `foo=1,2&foo=3`.
+  - An array param that repeats a value containing a `,`,
+    e.g., `foo=a,b&foo=c,d`.
+  - An array param using the bracket format with a value containing a `,`,
+    e.g., `foo[]=a,b`.
+  - An array param using the comma format with empty values,
+    e.g., `foo=a,,b`.
 
 Schemas that do not obey these rules throw an `UnparseableSchemaError`.
 
@@ -130,6 +157,21 @@ parseUrlSearchParams(
     tags: z.array(z.string()),
   }),
 ) // => { name: 'Dax', age: 27, isAdmin: true, tags: ['cars', 'planes'] }
+```
+
+Pass `strict: false` to enable [generous parsing](#generous-parsing),
+which accepts additional input formats
+at the cost of no longer being a true inverse of the serializer.
+
+```ts
+parseUrlSearchParams(
+  'isAdmin=yes&tags=cars,planes',
+  z.object({
+    isAdmin: z.boolean(),
+    tags: z.array(z.string()),
+  }),
+  { strict: false },
+) // => { isAdmin: true, tags: ['cars', 'planes'] }
 ```
 
 This parser does not validate its output:

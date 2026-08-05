@@ -4,14 +4,18 @@ import { z } from 'zod-v4'
 
 import {
   parseUrlSearchParams,
+  type ParseUrlSearchParamsOptions,
   UnparseableSchemaError,
   UnparseableSearchParamError,
 } from '@seamapi/url-search-params-parser'
 
 // The parser inspects Zod internals, which changed between Zod v3 and v4.
 // These tests mirror the core parsing behavior using schemas built with Zod v4.
-const parse = (query: string, schema: unknown): unknown =>
-  parseUrlSearchParams(query, schema as ZodSchema)
+const parse = (
+  query: string,
+  schema: unknown,
+  options?: ParseUrlSearchParamsOptions,
+): unknown => parseUrlSearchParams(query, schema as ZodSchema, options)
 
 test('zod-v4: parses primitive types', (t) => {
   const schema = z.object({
@@ -49,12 +53,15 @@ test('zod-v4: parses optional, nullable, default, and readonly wrappers', (t) =>
   })
 })
 
-test('zod-v4: parses arrays in all three formats', (t) => {
+test('zod-v4: parses arrays in all three formats when strict is false', (t) => {
   const schema = z.object({ foo: z.array(z.string()) })
   t.deepEqual(parse('foo=a&foo=b', schema), { foo: ['a', 'b'] })
-  t.deepEqual(parse('foo[]=a&foo[]=b', schema), { foo: ['a', 'b'] })
-  t.deepEqual(parse('foo=a,b', schema), { foo: ['a', 'b'] })
   t.deepEqual(parse('foo=', schema), { foo: [] })
+  t.deepEqual(parse('foo[]=a&foo[]=b', schema, { strict: false }), {
+    foo: ['a', 'b'],
+  })
+  t.deepEqual(parse('foo=a,b', schema, { strict: false }), { foo: ['a', 'b'] })
+  t.deepEqual(parse('foo=a,b', schema), { foo: ['a,b'] })
 })
 
 test('zod-v4: parses number arrays', (t) => {
@@ -112,7 +119,7 @@ test('zod-v4: parses enums of numeric TypeScript enums as numbers', (t) => {
 
 test('zod-v4: parses enum arrays', (t) => {
   const schema = z.object({ foo: z.array(z.enum(['a', 'b'])) })
-  t.deepEqual(parse('foo=a,b', schema), { foo: ['a', 'b'] })
+  t.deepEqual(parse('foo=a,b', schema, { strict: false }), { foo: ['a', 'b'] })
 })
 
 test('zod-v4: parses literals', (t) => {
@@ -155,10 +162,10 @@ test('zod-v4: parses null and never properties', (t) => {
 
 test('zod-v4: throws UnparseableSearchParamError on ambiguous input', (t) => {
   const schema = z.object({ foo: z.array(z.string()) })
-  t.throws(() => parse('foo=a&foo[]=b', schema), {
+  t.throws(() => parse('foo=a&foo[]=b', schema, { strict: false }), {
     instanceOf: UnparseableSearchParamError,
   })
-  t.throws(() => parse('foo[]=a,b', schema), {
+  t.throws(() => parse('foo[]=a,b', schema, { strict: false }), {
     instanceOf: UnparseableSearchParamError,
   })
 })
