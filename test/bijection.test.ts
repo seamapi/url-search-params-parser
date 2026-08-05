@@ -330,6 +330,37 @@ test(
   { foo: undefined, bar: 1 },
 )
 
+// The serializer documents that { foo: {}, bar: { baz: {} }, fizz: 1 }
+// serializes to fizz=1, so nested empty objects are also not invertible.
+test(
+  'nested empty objects, which are serialized as undefined',
+  notInvertible,
+  { foo: {}, bar: { baz: {} }, fizz: 1 },
+  z.object({
+    foo: z.record(z.string(), z.string()),
+    bar: z.object({ baz: z.record(z.string(), z.string()) }),
+    fizz: z.number(),
+  }),
+  { foo: undefined, bar: { baz: undefined }, fizz: 1 },
+)
+
+// The serialization of null and the empty array are the same,
+// so the schema is what disambiguates them.
+test('the empty array and null share a serialization', (t) => {
+  const query = serializeUrlSearchParams({ foo: [] })
+  t.is(query, serializeUrlSearchParams({ foo: null }))
+  t.deepEqual(
+    parseUrlSearchParams(query, z.object({ foo: z.array(z.string()) })),
+    {
+      foo: [],
+    },
+  )
+  t.deepEqual(
+    parseUrlSearchParams(query, z.object({ foo: z.string().nullable() })),
+    { foo: null },
+  )
+})
+
 test(
   'union record value types, which are all parsed as strings',
   notInvertible,
