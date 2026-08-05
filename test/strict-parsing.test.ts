@@ -29,19 +29,39 @@ test('strict: does not split array values containing a comma', (t) => {
   })
 })
 
-test('strict: cannot parse the bracket array format', (t) => {
-  t.throws(() => parseUrlSearchParams('foo[]=bar', arraySchema), {
-    instanceOf: UnparseableSearchParamError,
+test('strict: there is no bracket array format', (t) => {
+  // A param named foo[] is unrelated to the array param foo,
+  // exactly as the serializer treats them.
+  t.deepEqual(parseUrlSearchParams('foo[]=bar', arraySchema), {
+    foo: undefined,
   })
-  t.throws(() => parseUrlSearchParams('foo[]=bar&foo[]=baz', arraySchema), {
-    instanceOf: UnparseableSearchParamError,
+  t.deepEqual(parseUrlSearchParams('foo[]=bar&foo[]=baz', arraySchema), {
+    foo: undefined,
   })
-  t.throws(() => parseUrlSearchParams('foo[]=', arraySchema), {
-    instanceOf: UnparseableSearchParamError,
+  t.deepEqual(parseUrlSearchParams('foo=bar&foo[]=baz', arraySchema), {
+    foo: ['bar'],
   })
-  t.throws(() => parseUrlSearchParams('foo=bar&foo[]=baz', arraySchema), {
-    instanceOf: UnparseableSearchParamError,
-  })
+})
+
+test('strict: parses params literally named with a bracket suffix', (t) => {
+  t.deepEqual(
+    parseUrlSearchParams('foo[]=bar', z.object({ 'foo[]': z.string() })),
+    { 'foo[]': 'bar' },
+  )
+  t.deepEqual(
+    parseUrlSearchParams(
+      'foo[]=bar&foo[]=baz',
+      z.object({ 'foo[]': z.array(z.string()) }),
+    ),
+    { 'foo[]': ['bar', 'baz'] },
+  )
+  t.deepEqual(
+    parseUrlSearchParams(
+      'foo.a[]=1',
+      z.object({ foo: z.record(z.string(), z.number()) }),
+    ),
+    { foo: { 'a[]': 1 } },
+  )
 })
 
 test('strict: cannot parse arrays mixing empty values with other values', (t) => {

@@ -131,7 +131,9 @@ test('cannot parse nested params inside a record', (t) => {
   t.throws(() => parseUrlSearchParams('foo.a.b=1', schema), {
     instanceOf: UnparseableSearchParamError,
   })
-  t.throws(() => parseUrlSearchParams('foo.a[]=1', schema), {
+  // In strict mode, a[] is a literal record key,
+  // but in generous mode it is the unsupported bracket array format.
+  t.throws(() => parseUrlSearchParams('foo.a[]=1', schema, { strict: false }), {
     instanceOf: UnparseableSearchParamError,
   })
 })

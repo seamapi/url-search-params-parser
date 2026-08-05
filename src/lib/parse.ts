@@ -131,17 +131,20 @@ const parseArrayParam = (
   strict: boolean,
 ): unknown => {
   const repeatedValues = searchParams.getAll(name)
+
+  // The serializer only outputs the repeated array format,
+  // so in strict mode a param named foo[] is unrelated to the param foo:
+  // it is a param literally named "foo[]".
+  if (strict) {
+    if (repeatedValues.length === 0) return undefined
+    return parseArrayValues(name, repeatedValues, elementType, {
+      commaHandling: 'verbatim',
+      strict,
+    })
+  }
+
   const bracketName = `${name}[]`
   const bracketValues = searchParams.getAll(bracketName)
-
-  if (strict && bracketValues.length > 0) {
-    throw new UnparseableSearchParamError(
-      bracketName,
-      'uses the bracket array format, ' +
-        'which is never output by the serializer ' +
-        'and only parsed when strict is false',
-    )
-  }
 
   if (repeatedValues.length > 0 && bracketValues.length > 0) {
     throw new UnparseableSearchParamError(
@@ -160,7 +163,7 @@ const parseArrayParam = (
   if (repeatedValues.length === 0) return undefined
 
   return parseArrayValues(name, repeatedValues, elementType, {
-    commaHandling: strict ? 'verbatim' : 'split',
+    commaHandling: 'split',
     strict,
   })
 }
@@ -235,7 +238,9 @@ const parseRecordParam = (
   const entries = keys.map<[string, unknown]>((k) => {
     const recordKey = k.slice(prefix.length)
 
-    if (recordKey.includes('.') || recordKey.endsWith('[]')) {
+    // In strict mode there is no bracket array format,
+    // so a record key ending in [] is a literal record key.
+    if (recordKey.includes('.') || (!strict && recordKey.endsWith('[]'))) {
       throw new UnparseableSearchParamError(
         k,
         'is nested inside a record parameter, ' +

@@ -323,6 +323,16 @@ test(
   z.object({ foo: z.array(z.string()) }),
 )
 
+test(
+  'params literally named with a bracket suffix',
+  bijection,
+  {
+    'foo[]': 'a',
+    bar: ['b', 'c'],
+  },
+  z.object({ 'foo[]': z.string(), bar: z.array(z.string()) }),
+)
+
 // When parsing generously, a single array value containing a comma
 // is parsed using the comma array format.
 test('does not invert array values containing a comma when strict is false', (t) => {

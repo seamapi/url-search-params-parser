@@ -168,9 +168,6 @@ test('zod-v4: throws UnparseableSearchParamError on ambiguous input', (t) => {
   t.throws(() => parse('foo[]=a,b', schema, { strict: false }), {
     instanceOf: UnparseableSearchParamError,
   })
-  t.throws(() => parse('foo[]=a', schema), {
-    instanceOf: UnparseableSearchParamError,
-  })
 })
 
 test('zod-v4: throws UnparseableSearchParamError on repeated non-array params', (t) => {

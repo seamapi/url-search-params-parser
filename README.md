@@ -21,8 +21,10 @@ making the parser a true inverse of the serializer:
 - Parses `z.array()` only in the repeated format `foo=1&foo=2`.
   - Array values may contain a `,` and are never split,
     e.g., `foo=a,b&foo=c` is parsed as `['a,b', 'c']`.
-  - The bracket format `foo[]=1` throws an `UnparseableSearchParamError`,
-    since the serializer never outputs it.
+  - There is no bracket array format:
+    since the serializer never outputs it,
+    a param named `foo[]` is unrelated to the param `foo`
+    and is parsed as a param literally named `foo[]`.
 - For `z.boolean()`, only the strings `true` and `false` are parsed.
 - Whitespace is significant and is never trimmed:
   only a completely empty value is parsed as `null`
@@ -77,7 +79,6 @@ These throw an `UnparseableSearchParamError`:
   since this would be a null object containing a value.
 - A param nested inside a record param,
   e.g., `foo.a.b=1` for `z.record(z.string(), z.number())`.
-- In strict mode, an array param using the bracket format, e.g., `foo[]=1`.
 - In generous mode (`strict: false`):
   - An array param that mixes array formats,
     e.g., `foo=1&foo[]=2` or `foo=1,2&foo=3`.
