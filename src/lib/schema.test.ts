@@ -154,6 +154,36 @@ test('nullable schemas', valueType, z.string().nullable(), 'string')
 test('nullish schemas', valueType, z.number().nullish(), 'number')
 test('default schemas', valueType, z.number().default(0), 'number')
 test('readonly schemas', valueType, z.number().readonly(), 'number')
+test(
+  'refined schemas',
+  valueType,
+  z.number().refine((v) => v > 0),
+  'number',
+)
+test(
+  'transformed schemas',
+  valueType,
+  z.number().transform((v) => String(v)),
+  'number',
+)
+test(
+  'preprocessed schemas',
+  valueType,
+  z.preprocess((v) => v, z.number()),
+  'number',
+)
+test('piped schemas', valueType, z.number().pipe(z.number().min(0)), 'number')
+
+test('zodSchemaToParamSchema: parses refined object schemas', (t) => {
+  t.deepEqual(
+    zodSchemaToParamSchema(
+      z.object({ foo: z.string() }).refine((data) => data.foo !== 'a'),
+    ),
+    {
+      foo: 'string',
+    },
+  )
+})
 
 test('string arrays', valueType, z.array(z.string()), 'string_array')
 test('number arrays', valueType, z.array(z.number()), 'number_array')

@@ -18,8 +18,8 @@ import {
   isZodUnion,
   unwrapZodSchema,
   zodArrayElementType,
-  zodLiteralValue,
-  zodNativeEnumValues,
+  zodEnumValues,
+  zodLiteralValues,
   zodRecordKeyType,
   zodRecordValueType,
   zodSchemaName,
@@ -376,8 +376,9 @@ const primitiveToValueType = (
   if (isZodDate(schema)) return 'date'
   if (isZodNull(schema)) return 'null'
   if (isZodNever(schema)) return 'never'
-  if (isZodEnum(schema)) return 'string'
-  if (isZodNativeEnum(schema)) return nativeEnumToValueType(schema, path)
+  if (isZodEnum(schema) || isZodNativeEnum(schema)) {
+    return enumToValueType(schema, path)
+  }
   if (isZodLiteral(schema)) return literalToValueType(schema, path)
 
   throw new UnparseableSchemaError(
@@ -386,11 +387,8 @@ const primitiveToValueType = (
   )
 }
 
-const nativeEnumToValueType = (
-  schema: ZodTypeAny,
-  path: string[],
-): ValueType => {
-  const values = zodNativeEnumValues(schema)
+const enumToValueType = (schema: ZodTypeAny, path: string[]): ValueType => {
+  const values = zodEnumValues(schema)
 
   const valueTypes = [
     ...new Set(
@@ -407,21 +405,36 @@ const nativeEnumToValueType = (
 
   throw new UnparseableSchemaError(
     path,
-    'a native enum schema must have only string values or only number values',
+    'an enum schema must have only string values or only number values',
   )
 }
 
 const literalToValueType = (schema: ZodTypeAny, path: string[]): ValueType => {
-  const value = zodLiteralValue(schema)
-  if (value === null) return 'null'
-  if (typeof value === 'string') return 'string'
-  if (typeof value === 'number') return 'number'
-  if (typeof value === 'boolean') return 'boolean'
-  if (value instanceof Date) return 'date'
+  const valueTypes = [
+    ...new Set(
+      zodLiteralValues(schema).map((value) => {
+        if (value === null) return 'null'
+        if (typeof value === 'string') return 'string'
+        if (typeof value === 'number') return 'number'
+        if (typeof value === 'boolean') return 'boolean'
+        if (value instanceof Date) return 'date'
+        throw new UnparseableSchemaError(
+          path,
+          `a literal schema of type ${typeof value} is not supported`,
+        )
+      }),
+    ),
+  ]
+
+  const nonNullTypes = valueTypes.filter((t) => t !== 'null')
+
+  const [first] = nonNullTypes
+  if (first == null) return 'null'
+  if (nonNullTypes.length === 1) return first
 
   throw new UnparseableSchemaError(
     path,
-    `a literal schema of type ${typeof value} is not supported`,
+    'a literal schema must have values of a single type',
   )
 }
 
