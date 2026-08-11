@@ -6,5 +6,8 @@ export default () => {
     },
     extensions: ['ts'],
     nodeArguments: ['--import=tsx'],
+    // Node.js ignores the --import in a worker thread's execArgv, so the tsx
+    // hooks are only registered when each test file gets its own process.
+    workerThreads: false,
   }
 }
