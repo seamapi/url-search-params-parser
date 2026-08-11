@@ -64,6 +64,10 @@ These rules apply in strict and generous mode alike:
   Whitespace is significant and is never trimmed for `z.string()`.
 - For `z.object()` and `z.record()`, a non-empty value is passed through
   unchanged as a string, e.g., `foo=a` is parsed as `'a'`.
+- Schema properties not present in the search params are omitted from the
+  output, rather than set to `undefined`,
+  since the serializer omits an `undefined` property entirely.
+  An object is itself omitted when none of its properties are present.
 - Search params not present in the schema are ignored.
 
 ### Unparseable Search Params
