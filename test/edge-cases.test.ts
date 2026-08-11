@@ -60,7 +60,7 @@ test('pass though object values that do not parse as an object', (t) => {
   )
 })
 
-test('parses missing params as undefined', (t) => {
+test('omits missing params', (t) => {
   t.deepEqual(
     parseUrlSearchParams(
       '',
@@ -74,15 +74,21 @@ test('parses missing params as undefined', (t) => {
         g: z.object({ h: z.string() }),
       }),
     ),
-    {
-      a: undefined,
-      b: undefined,
-      c: undefined,
-      d: undefined,
-      e: undefined,
-      f: undefined,
-      g: { h: undefined },
-    },
+    {},
+  )
+})
+
+test('omits optional params that are not in the query string', (t) => {
+  t.deepEqual(
+    parseUrlSearchParams(
+      'foo=a',
+      z.object({
+        foo: z.string(),
+        bar: z.string().optional(),
+        baz: z.object({ fizz: z.string() }).optional(),
+      }),
+    ),
+    { foo: 'a' },
   )
 })
 
@@ -96,10 +102,8 @@ test('ignores params not present in the schema', (t) => {
   )
 })
 
-test('parses never params as undefined', (t) => {
-  t.deepEqual(parseUrlSearchParams('foo=a', z.object({ foo: z.never() })), {
-    foo: undefined,
-  })
+test('omits never params', (t) => {
+  t.deepEqual(parseUrlSearchParams('foo=a', z.object({ foo: z.never() })), {})
 })
 
 // e.g., foo.bar= would conflict with foo.bar.a= or foo.bar.b=2
@@ -212,11 +216,9 @@ test('parses params for union schemas', (t) => {
   t.deepEqual(parseUrlSearchParams('type=a&value=1', schema), {
     type: 'a',
     value: 1,
-    other: undefined,
   })
   t.deepEqual(parseUrlSearchParams('type=b&other=c', schema), {
     type: 'b',
-    value: undefined,
     other: 'c',
   })
 })

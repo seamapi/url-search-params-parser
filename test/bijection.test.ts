@@ -20,14 +20,7 @@ const bijection = test.macro({
   },
 })
 
-test(
-  'empty params',
-  bijection,
-  {
-    foo: undefined,
-  },
-  z.object({ foo: z.string().optional() }),
-)
+test('empty params', bijection, {}, z.object({ foo: z.string().optional() }))
 
 test(
   'nested params',
@@ -271,13 +264,11 @@ test(
   bijection,
   {
     foo: 'a',
-    bar: undefined,
-    baz: { fizz: undefined },
   },
   z.object({
     foo: z.string().optional(),
     bar: z.number().optional(),
-    baz: z.object({ fizz: z.string().optional() }),
+    baz: z.object({ fizz: z.string().optional() }).optional(),
   }),
 )
 
@@ -311,7 +302,21 @@ test(
   notInvertible,
   { foo: '' },
   z.object({ foo: z.string() }),
-  { foo: undefined },
+  {},
+)
+
+// An explicitly undefined property serializes to nothing at all,
+// so it comes back absent rather than present and undefined.
+test(
+  'explicitly undefined params, which are serialized as undefined',
+  notInvertible,
+  { foo: 'a', bar: undefined, baz: { fizz: undefined } },
+  z.object({
+    foo: z.string(),
+    bar: z.number().optional(),
+    baz: z.object({ fizz: z.string().optional() }).optional(),
+  }),
+  { foo: 'a' },
 )
 
 test(
@@ -350,7 +355,7 @@ test(
   notInvertible,
   { foo: {}, bar: 1 },
   z.object({ foo: z.record(z.string(), z.string()), bar: z.number() }),
-  { foo: undefined, bar: 1 },
+  { bar: 1 },
 )
 
 // The serializer documents that { foo: {}, bar: { baz: {} }, fizz: 1 }
@@ -364,7 +369,7 @@ test(
     bar: z.object({ baz: z.record(z.string(), z.string()) }),
     fizz: z.number(),
   }),
-  { foo: undefined, bar: { baz: undefined }, fizz: 1 },
+  { fizz: 1 },
 )
 
 // The serialization of null and the empty array are the same,

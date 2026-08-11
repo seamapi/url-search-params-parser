@@ -32,12 +32,8 @@ test('strict: does not split array values containing a comma', (t) => {
 test('strict: there is no bracket array format', (t) => {
   // A param named foo[] is unrelated to the array param foo,
   // exactly as the serializer treats them.
-  t.deepEqual(parseUrlSearchParams('foo[]=bar', arraySchema), {
-    foo: undefined,
-  })
-  t.deepEqual(parseUrlSearchParams('foo[]=bar&foo[]=baz', arraySchema), {
-    foo: undefined,
-  })
+  t.deepEqual(parseUrlSearchParams('foo[]=bar', arraySchema), {})
+  t.deepEqual(parseUrlSearchParams('foo[]=bar&foo[]=baz', arraySchema), {})
   t.deepEqual(parseUrlSearchParams('foo=bar&foo[]=baz', arraySchema), {
     foo: ['bar'],
   })
