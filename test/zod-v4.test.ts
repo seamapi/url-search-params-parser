@@ -46,7 +46,6 @@ test('zod-v4: parses optional, nullable, default, and readonly wrappers', (t) =>
     d: z.string().readonly(),
   })
   t.deepEqual(parse('b=&c=false&d=x', schema), {
-    a: undefined,
     b: null,
     c: false,
     d: 'x',
@@ -98,7 +97,6 @@ test('zod-v4: parses discriminated unions', (t) => {
   ])
   t.deepEqual(parse('type=b&b=2', schema), {
     type: 'b',
-    a: undefined,
     b: 2,
   })
 })
@@ -157,7 +155,7 @@ test('zod-v4: parses schemas with transforms as their input type', (t) => {
 
 test('zod-v4: parses null and never properties', (t) => {
   const schema = z.object({ foo: z.null(), bar: z.never().optional() })
-  t.deepEqual(parse('foo=', schema), { foo: null, bar: undefined })
+  t.deepEqual(parse('foo=', schema), { foo: null })
 })
 
 test('zod-v4: throws UnparseableSearchParamError on ambiguous input', (t) => {

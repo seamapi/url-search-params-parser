@@ -77,13 +77,23 @@ const parseFromParamSchema = (
     return parseNestedValue(searchParams, name, strict)
   }
 
-  const entries = Object.entries(node).reduce<Array<[string, unknown]>>(
-    (acc, [k, v]) => [
-      ...acc,
-      [k, parseFromParamSchema(searchParams, v, [...path, k], strict)],
-    ],
-    [],
-  )
+  const properties = Object.entries(node)
+
+  // A param that is not in the query string is absent from the result
+  // rather than present and undefined, so an optional property is simply
+  // missing, exactly as it was before the serializer dropped it.
+  const entries = properties.reduce<Array<[string, unknown]>>((acc, [k, v]) => {
+    const value = parseFromParamSchema(searchParams, v, [...path, k], strict)
+    if (value === undefined) return acc
+    return [...acc, [k, value]]
+  }, [])
+
+  // An object none of whose properties are in the query string is itself
+  // absent, so that it too is omitted rather than parsed as {}.
+  // An object schema with no properties at all always parses as {}.
+  if (path.length > 0 && properties.length > 0 && entries.length === 0) {
+    return undefined
+  }
 
   return Object.fromEntries(entries)
 }
