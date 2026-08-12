@@ -101,10 +101,19 @@ jobs:
           path: index.js
           contents: |
             import '@seamapi/url-search-params-parser'
+      - name: Create index.cjs
+        uses: DamianReeves/write-file-action@v1.3
+        with:
+          write-mode: overwrite
+          path: index.cjs
+          contents: |
+            require('@seamapi/url-search-params-parser')
       - name: Install
         run: npm install --save ${{ steps.packages.outputs.paths }}
       - name: Run
         run: node index.js
+      - name: Run from CommonJS
+        run: node index.cjs
   typecheck:
     name: Typecheck (Node.js v${{ matrix.node }})
     runs-on: ubuntu-latest
