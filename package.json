@@ -74,7 +74,7 @@
     "zod": "^3.0.0 || ^4.0.0"
   },
   "devDependencies": {
-    "@seamapi/url-search-params-serializer": "^3.0.0",
+    "@seamapi/url-search-params-serializer": "^3.0.3",
     "@types/node": "^24.10.9",
     "ava": "^8.0.1",
     "c8": "^12.0.0",
