@@ -150,7 +150,20 @@ test('number literals', valueType, z.literal(1), 'number')
 test('boolean literals', valueType, z.literal(true), 'boolean')
 
 test('optional schemas', valueType, z.string().optional(), 'string')
-test('nullable schemas', valueType, z.string().nullable(), 'string')
+test('nullable schemas', valueType, z.string().nullable(), 'nullable_string')
+test(
+  'nullable string unions',
+  valueType,
+  z.union([z.string(), z.null()]),
+  'nullable_string',
+)
+test(
+  'nullish string schemas',
+  valueType,
+  z.string().nullish(),
+  'nullable_string',
+)
+test('nullable non-string schemas', valueType, z.number().nullable(), 'number')
 test('nullish schemas', valueType, z.number().nullish(), 'number')
 test('default schemas', valueType, z.number().default(0), 'number')
 test('readonly schemas', valueType, z.number().readonly(), 'number')

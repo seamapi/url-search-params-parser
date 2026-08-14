@@ -30,12 +30,14 @@ export type PrimitiveType = 'string' | 'number' | 'boolean' | 'date'
 
 export type ValueType =
   | PrimitiveType
+  | 'nullable_string'
   | 'null'
   | 'never'
   | 'string_array'
   | 'number_array'
   | 'date_array'
   | 'string_record'
+  | 'nullable_string_record'
   | 'number_record'
   | 'boolean_record'
   | 'date_record'
@@ -56,6 +58,7 @@ const arrayValueTypes: Partial<Record<ValueType, ValueType>> = {
 
 const recordValueTypes: Partial<Record<ValueType, ValueType>> = {
   string: 'string_record',
+  nullable_string: 'nullable_string_record',
   number: 'number_record',
   boolean: 'boolean_record',
   date: 'date_record',
@@ -97,7 +100,11 @@ const nestedZodSchemaToParamSchema = (
     return arrayToValueType(inner, path)
   }
 
-  return primitiveToValueType(inner, path)
+  const valueType = primitiveToValueType(inner, path)
+
+  if (isNullable && valueType === 'string') return 'nullable_string'
+
+  return valueType
 }
 
 const objectToParamSchema = (
@@ -152,6 +159,10 @@ const mergeParamSchemas = (
 ): ParamSchema | ValueType => {
   if (typeof a === 'string' && typeof b === 'string') {
     if (a === b) return a
+
+    const nullableString = mergeNullableString(a, b)
+    if (nullableString != null) return nullableString
+
     if (permissiveValueTypes.includes(a)) return b
     if (permissiveValueTypes.includes(b)) return a
     throw new UnparseableSchemaError(
@@ -190,6 +201,19 @@ const mergeParamSchemas = (
   )
 
   return Object.fromEntries(entries)
+}
+
+const mergeNullableString = (
+  a: ValueType,
+  b: ValueType,
+): ValueType | undefined => {
+  const valueTypes = new Set([a, b])
+  const isString = valueTypes.has('string') || valueTypes.has('nullable_string')
+  if (!isString) return undefined
+  if (valueTypes.has('null') || valueTypes.has('nullable_string')) {
+    return 'nullable_string'
+  }
+  return undefined
 }
 
 const arrayToValueType = (schema: ZodTypeAny, path: string[]): ValueType => {
@@ -261,16 +285,21 @@ const recordToValueType = (schema: ZodTypeAny, path: string[]): ValueType => {
     )
   }
 
-  const { schema: value } = unwrapZodSchema(valueSchema)
+  const { schema: value, isNullable } = unwrapZodSchema(valueSchema)
 
   assertNotNested(value, path, 'a record')
 
   const valueType = flatPrimitiveValueType(value, path, 'a record', true)
 
+  const nullableValueType =
+    isNullable && valueType === 'string' ? 'nullable_string' : valueType
+
   // A record of only null values carries no primitive type information,
   // so parse the values as strings.
   const recordValueType =
-    valueType === 'null' ? 'string_record' : recordValueTypes[valueType]
+    nullableValueType === 'null'
+      ? 'string_record'
+      : recordValueTypes[nullableValueType]
 
   if (recordValueType == null) {
     throw new UnparseableSchemaError(

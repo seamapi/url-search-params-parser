@@ -8,7 +8,7 @@ import {
 } from './schema.js'
 
 // Value types that are parsed from a single search param value.
-type LeafType = PrimitiveType | 'null'
+type LeafType = PrimitiveType | 'nullable_string' | 'null'
 
 // How array values containing a comma are handled:
 // split into the array (the comma array format),
@@ -23,6 +23,7 @@ const arrayElementTypes: Partial<Record<ValueType, LeafType>> = {
 
 const recordElementTypes: Partial<Record<ValueType, LeafType>> = {
   string_record: 'string',
+  nullable_string_record: 'nullable_string',
   number_record: 'number',
   boolean_record: 'boolean',
   date_record: 'date',
@@ -316,8 +317,10 @@ const assertNoNestedParams = (
 }
 
 const parseLeaf = (value: string, type: LeafType, strict: boolean): unknown => {
-  // Zero-length strings are not serializable, so an empty value is null.
-  if (type === 'string') return value.length === 0 ? null : value
+  if (type === 'string' || type === 'nullable_string') {
+    if (value.length > 0) return value
+    return strict || type === 'nullable_string' ? null : ''
+  }
 
   if (strict) {
     if (value.length === 0) return null

@@ -110,11 +110,32 @@ test('strict: parses empty values as null', (t) => {
     foo: null,
   })
   t.deepEqual(
+    parseUrlSearchParams('foo=', z.object({ foo: z.string().nullable() })),
+    { foo: null },
+  )
+  t.deepEqual(
     parseUrlSearchParams(
       'foo=',
       z.object({ foo: z.record(z.string(), z.string()) }),
     ),
     { foo: null },
+  )
+})
+
+test('strict: parses empty record values as null', (t) => {
+  t.deepEqual(
+    parseUrlSearchParams(
+      'foo.a=',
+      z.object({ foo: z.record(z.string(), z.string()) }),
+    ),
+    { foo: { a: null } },
+  )
+  t.deepEqual(
+    parseUrlSearchParams(
+      'foo.a=',
+      z.object({ foo: z.record(z.string(), z.string().nullable()) }),
+    ),
+    { foo: { a: null } },
   )
 })
 
