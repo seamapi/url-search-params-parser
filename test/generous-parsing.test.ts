@@ -75,6 +75,55 @@ test('does not trim whitespace before parsing string params', (t) => {
   t.deepEqual(parse('foo=+', schema), { foo: ' ' })
 })
 
+const parseEmptyAsEmptyString = test.macro({
+  title(providedTitle) {
+    return `parses empty ${providedTitle} params as the empty string`
+  },
+  exec(t, type: ZodSchema) {
+    t.deepEqual(parse('foo=', z.object({ foo: type })), { foo: '' })
+  },
+})
+
+test('string', parseEmptyAsEmptyString, z.string())
+test('optional string', parseEmptyAsEmptyString, z.string().optional())
+test('enum', parseEmptyAsEmptyString, z.enum(['a', 'b']))
+
+const parseEmptyAsNull = test.macro({
+  title(providedTitle) {
+    return `parses empty ${providedTitle} params as null`
+  },
+  exec(t, type: ZodSchema) {
+    t.deepEqual(parse('foo=', z.object({ foo: type })), { foo: null })
+  },
+})
+
+test('nullable string', parseEmptyAsNull, z.string().nullable())
+test('nullish string', parseEmptyAsNull, z.string().nullish())
+test(
+  'string union with null',
+  parseEmptyAsNull,
+  z.union([z.string(), z.null()]),
+)
+
+test('does not parse whitespace string params as the empty string', (t) => {
+  const schema = z.object({ foo: z.string().nullable() })
+  t.deepEqual(parse('foo=+', schema), { foo: ' ' })
+})
+
+test('parses empty record value params by nullability', (t) => {
+  t.deepEqual(
+    parse('foo.a=', z.object({ foo: z.record(z.string(), z.string()) })),
+    { foo: { a: '' } },
+  )
+  t.deepEqual(
+    parse(
+      'foo.a=',
+      z.object({ foo: z.record(z.string(), z.string().nullable()) }),
+    ),
+    { foo: { a: null } },
+  )
+})
+
 test('parses additional strings as true', (t) => {
   const schema = z.object({ foo: z.boolean() })
   for (const value of ['true', 'True', 'TRUE', 'yes', 'Yes', 'YES', '1']) {
