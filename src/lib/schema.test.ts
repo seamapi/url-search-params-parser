@@ -235,6 +235,36 @@ test(
   z.record(z.string(), z.union([z.string(), z.number()])),
   'string_record',
 )
+test(
+  'nullable string value records',
+  valueType,
+  z.record(z.string(), z.string().nullable()),
+  'nullable_string_record',
+)
+test(
+  'null union value records',
+  valueType,
+  z.record(z.string(), z.union([z.string(), z.null()])),
+  'nullable_string_record',
+)
+test(
+  'mixed null union value records',
+  valueType,
+  z.record(z.string(), z.union([z.string(), z.boolean(), z.null()])),
+  'nullable_string_record',
+)
+test(
+  'nullable option union value records',
+  valueType,
+  z.record(z.string(), z.union([z.string().nullable(), z.boolean()])),
+  'nullable_string_record',
+)
+test(
+  'non-null union value records',
+  valueType,
+  z.record(z.string(), z.union([z.string(), z.boolean()])),
+  'string_record',
+)
 
 test('nullable object schemas', (t) => {
   t.deepEqual(
