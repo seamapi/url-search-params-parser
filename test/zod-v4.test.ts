@@ -82,6 +82,15 @@ test('zod-v4: parses records', (t) => {
   t.deepEqual(parse('foo.a=1&foo.b=2', schema), { foo: { a: 1, b: 2 } })
 })
 
+test('zod-v4: parses records with a null union value type', (t) => {
+  const schema = z.object({
+    foo: z.record(z.string(), z.union([z.string(), z.boolean(), z.null()])),
+  })
+  t.deepEqual(parse('foo.a=x&foo.b=', schema, { strict: false }), {
+    foo: { a: 'x', b: null },
+  })
+})
+
 test('zod-v4: parses unions of objects', (t) => {
   const schema = z.union([
     z.object({ a: z.string() }),

@@ -122,6 +122,33 @@ test('parses empty record value params by nullability', (t) => {
     ),
     { foo: { a: null } },
   )
+  t.deepEqual(
+    parse(
+      'foo.a=',
+      z.object({
+        foo: z.record(z.string(), z.union([z.string(), z.null()])),
+      }),
+    ),
+    { foo: { a: null } },
+  )
+  t.deepEqual(
+    parse(
+      'foo.a=',
+      z.object({
+        foo: z.record(z.string(), z.union([z.string(), z.boolean(), z.null()])),
+      }),
+    ),
+    { foo: { a: null } },
+  )
+  t.deepEqual(
+    parse(
+      'foo.a=',
+      z.object({
+        foo: z.record(z.string(), z.union([z.string(), z.boolean()])),
+      }),
+    ),
+    { foo: { a: '' } },
+  )
 })
 
 test('parses additional strings as true', (t) => {

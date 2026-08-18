@@ -216,6 +216,17 @@ test(
 )
 
 test(
+  'null union record value params',
+  bijection,
+  {
+    foo: { a: 'x', b: null },
+  },
+  z.object({
+    foo: z.record(z.string(), z.union([z.string(), z.boolean(), z.null()])),
+  }),
+)
+
+test(
   'enum and literal params',
   bijection,
   {

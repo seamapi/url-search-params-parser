@@ -292,7 +292,9 @@ const recordToValueType = (schema: ZodTypeAny, path: string[]): ValueType => {
   const valueType = flatPrimitiveValueType(value, path, 'a record', true)
 
   const nullableValueType =
-    isNullable && valueType === 'string' ? 'nullable_string' : valueType
+    (isNullable || hasNullUnionOption(value)) && valueType === 'string'
+      ? 'nullable_string'
+      : valueType
 
   // A record of only null values carries no primitive type information,
   // so parse the values as strings.
@@ -309,6 +311,19 @@ const recordToValueType = (schema: ZodTypeAny, path: string[]): ValueType => {
   }
 
   return recordValueType
+}
+
+// A record value schema can express nullability as a wrapper,
+// z.string().nullable(), or as a null option of a union,
+// z.union([z.string(), z.null()]). flatPrimitiveValueType resolves a union by
+// discarding its null option as permissive, so the union form is detected here.
+const hasNullUnionOption = (schema: ZodTypeAny): boolean => {
+  if (!isZodUnion(schema) && !isZodDiscriminatedUnion(schema)) return false
+
+  return zodUnionOptions(schema).some((option) => {
+    const { schema: inner, isNullable } = unwrapZodSchema(option)
+    return isNullable || isZodNull(inner)
+  })
 }
 
 const assertNotNested = (
