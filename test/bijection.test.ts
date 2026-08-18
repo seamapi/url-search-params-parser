@@ -222,7 +222,7 @@ test(
     foo: { a: 'x', b: null },
   },
   z.object({
-    foo: z.record(z.string(), z.union([z.string(), z.boolean(), z.null()])),
+    foo: z.record(z.string(), z.union([z.string(), z.null()])),
   }),
 )
 
